@@ -43,4 +43,12 @@ This keeps the gradient "pinned" to the price action without forcing the Y-axis 
 ⚖️ Disclaimer
 
 This indicator is for visual and aesthetic purposes only. It does not provide buy/sell signals. Trading involves significant risk, and you should use this tool as a supplement to your existing strategy.
+
+
+
+
+
+
+
+
 <img width="456" height="359" alt="Screenshot 2026-01-07 at 8 11 54 PM" src="https://github.com/user-attachments/assets/8da2b3c9-6087-40e5-ab14-85ff9d559917" />
