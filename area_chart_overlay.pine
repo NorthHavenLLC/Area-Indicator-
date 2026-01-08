@@ -1,0 +1,64 @@
+//@version=5
+indicator("Area Chart Overlay Clone", overlay=true, shorttitle="Area Overlay")
+
+// ============================================================================
+// USER INPUTS
+// ============================================================================
+
+// Price Source
+src = input.source(close, "Price Source", tooltip="The price value to track for the area chart overlay")
+
+// Color Settings
+areaColor = input.color(color.new(#2962FF, 60), "Area Color", tooltip="Primary color for the gradient fill (semi-transparent blue at top)")
+fadeColor = input.color(color.new(#2962FF, 100), "Fade/Bottom Color", tooltip="Bottom color of gradient (fully transparent)")
+lineColor = input.color(color.new(color.black, 0), "Top Line Color", tooltip="Color for the dark price line at the top of the area")
+
+// Gradient Configuration
+depth = input.float(10.0, "Gradient Depth %", minval=1.0, maxval=50.0, step=1.0, tooltip="How far the color stretches down the chart as a percentage of price")
+
+// Optional: Dynamic Color Based on Price Direction
+useDynamicColor = input.bool(false, "Use Dynamic Color", tooltip="Change color based on price direction")
+bullishColor = input.color(color.new(#26A69A, 60), "Bullish Color", tooltip="Color when price is rising")
+bearishColor = input.color(color.new(#EF5350, 60), "Bearish Color", tooltip="Color when price is falling")
+
+// ============================================================================
+// LOGIC
+// ============================================================================
+
+// Determine if price is rising or falling
+priceRising = ta.rising(src, 1)
+currentAreaColor = useDynamicColor ? (priceRising ? bullishColor : bearishColor) : areaColor
+currentFadeColor = useDynamicColor ? (priceRising ? color.new(#26A69A, 100) : color.new(#EF5350, 100)) : fadeColor
+currentLineColor = useDynamicColor ? (priceRising ? color.new(#26A69A, 0) : color.new(#EF5350, 0)) : lineColor
+
+// Calculate the baseline (the 'floor' of the area chart)
+// This is offset as a percentage below price to prevent squashing candles
+baseline = src * (1 - (depth / 100))
+
+// ============================================================================
+// PLOTS
+// ============================================================================
+
+// Top line: tracks the price source exactly (1:1 with close)
+// This is the dark jagged line visible at the top of the area
+p_top_line = plot(src, color=currentLineColor, linewidth=2, title="Price Line")
+
+// Top plot for gradient fill: uses semi-transparent area color
+// This defines the top of the gradient (more opaque blue)
+p_top = plot(src, color=currentAreaColor, linewidth=0, title="Top Gradient", display=display.none)
+
+// Bottom line: the baseline for the gradient (fully transparent)
+// Pine Script automatically creates a vertical gradient by interpolating between
+// the top plot color (semi-transparent) and bottom plot color (fully transparent)
+p_bot = plot(baseline, color=currentFadeColor, linewidth=0, title="Baseline", display=display.none)
+
+// ============================================================================
+// GRADIENT FILL
+// ============================================================================
+
+// Fill the area between price and baseline with a smooth vertical gradient
+// Pine Script interpolates between p_top color (semi-transparent) and p_bot color (transparent)
+// This creates the exact "glass overlay" effect shown in the reference image
+// The fill renders directly on top of candlesticks due to overlay=true
+fill(p_top, p_bot, title="Area Gradient")
+
